@@ -1,10 +1,10 @@
-import logging
-
 from fastapi import status
 from fastapi import Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+
+from loguru import logger
 
 from app.core.exceptions import (
     ProblemDetails,
@@ -12,7 +12,6 @@ from app.core.exceptions import (
     DOMAIN_EXCEPTION_MAP
 )
 
-logger = logging.getLogger(__name__)
 
 async def domain_exception_handler(
         request: Request, exception: DomainException
@@ -75,7 +74,7 @@ async def unhandled_exception_handler(
         request: Request, exception: Exception
 ) -> JSONResponse:
 
-    logger.exception("Unhandled exception on %s", request.url.path)
+    logger.exception(f"Unhandled exception on {request.url.path}")
 
     problem = ProblemDetails(
         type="about:blank",

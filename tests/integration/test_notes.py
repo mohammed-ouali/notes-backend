@@ -155,7 +155,7 @@ class TestCreateNote:
             json=payload,
         )
 
-        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     async def test_create_note_invalid_title(
         self,

@@ -46,10 +46,6 @@ class Note(Base):
         back_populates="notes"
     )
 
-    labels: Mapped[list["Label"]] = relationship(
-        back_populates="note",
-        cascade="all, delete-orphan",
-        lazy="selectin"
-    )
+    
 
     

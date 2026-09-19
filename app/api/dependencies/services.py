@@ -7,12 +7,9 @@ from app.services.auth import AuthService
 from app.services.user import UserService
 from app.services.folder import FolderService
 from app.services.note import NoteService
-from app.services.label import LabelService
-
 from app.repositories.user import UserRepository
 from app.repositories.folder import FolderRepository
 from app.repositories.note import NoteRepository
-from app.repositories.label import LabelRepository
 
 
 def get_auth_service(
@@ -50,10 +47,3 @@ def get_note_service(
         folder_repository=folder_repository,
     )
 
-
-def get_label_service(
-    db: AsyncSession = Depends(get_db),
-) -> LabelService:
-    repository = LabelRepository(db)
-
-    return LabelService(repository)

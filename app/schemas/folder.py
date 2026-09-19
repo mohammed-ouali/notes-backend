@@ -23,7 +23,6 @@ class FolderBase(BaseModel):
 
 
 class FolderCreate(FolderBase):
-    user_id: int = Field(..., gt=0)
     parent_id: int | None = Field(None, gt=0)
 
 

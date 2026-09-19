@@ -22,7 +22,7 @@ async def get_current_user_profile(
     return current_user
 
 
-@router.patch(
+@router.put(
     "/me",
     response_model=UserResponse,
 )

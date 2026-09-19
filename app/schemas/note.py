@@ -4,8 +4,6 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from app.schemas.label import LabelResponse
-
 
 class NoteBase(BaseModel):
     title: str = Field(
@@ -35,7 +33,6 @@ class NoteBase(BaseModel):
 
 
 class NoteCreate(NoteBase):
-    user_id: int = Field(..., gt=0)
     folder_id: int | None = Field(None, gt=0)
 
 
@@ -83,6 +80,5 @@ class NoteResponse(NoteBase):
     folder_id: int | None
     created_at: datetime
     updated_at: datetime
-    labels: list[LabelResponse] = Field(default_factory=list)
 
     model_config = ConfigDict(from_attributes=True)

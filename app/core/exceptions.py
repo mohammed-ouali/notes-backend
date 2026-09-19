@@ -65,16 +65,6 @@ class NoteNotFoundException(DomainException):
     def __init__(self, message: str = "Note not found"):
         super().__init__(message)
 
-
-class LabelNotFoundException(DomainException):
-    def __init__(self, message: str = "Label not found"):
-        super().__init__(message)
-
-
-class LabelAlreadyExistsException(DomainException):
-    def __init__(self, message: str = "Label already exists"):
-        super().__init__(message)
-
 class InvalidCredentialsException(DomainException):
     def __init__(self, message: str = "Invalid Credentials"):
         super().__init__(message)
@@ -89,16 +79,14 @@ class InvalidTokenException(DomainException):
 
 class InvalidPasswordException(DomainException):
     def __init__(self, message: str = "Invalid password"):
-        super().__init__(message=message, status_code=400)
+        super().__init__(message=message)
 
 DOMAIN_EXCEPTION_MAP: dict[type[DomainException], tuple[int, str]] = {
     UserNotFoundException: (status.HTTP_404_NOT_FOUND, "User Not Found"),
     FolderNotFoundException: (status.HTTP_404_NOT_FOUND, "Folder Not Found"),
     NoteNotFoundException: (status.HTTP_404_NOT_FOUND, "Note Not Found"),
-    LabelNotFoundException: (status.HTTP_404_NOT_FOUND, "Label Not Found"),
     UserAlreadyExistsException: (status.HTTP_409_CONFLICT, "User Already Exists"),
     FolderAlreadyExistsException: (status.HTTP_409_CONFLICT, "Folder Already Exists"),
-    LabelAlreadyExistsException: (status.HTTP_409_CONFLICT, "Label Already Exists"),
     InvalidFolderHierarchyException: (status.HTTP_400_BAD_REQUEST, "Invalid Folder Hierarchy"),
     InvalidCredentialsException: (status.HTTP_401_UNAUTHORIZED, "Invalid Credentials"),
     TokenExpiredException: (status.HTTP_401_UNAUTHORIZED, "Token Expired"),

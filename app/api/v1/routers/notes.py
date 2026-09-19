@@ -3,21 +3,15 @@ from typing import Literal
 from fastapi import APIRouter, Depends, Query, status
 
 from app.api.dependencies.services import get_note_service
-from app.api.dependencies.services import get_label_service
 from app.api.dependencies.auth import get_current_active_user
 from app.models import User
-from app.schemas.label import (
-    LabelCreate,
-    LabelResponse,
-    LabelUpdate,
-)
+
 from app.schemas.note import (
     NoteCreate,
     NoteResponse,
     NoteUpdate,
 )
 from app.schemas.pagination import PaginatedResponse
-from app.services.label import LabelService
 from app.services.note import NoteService
 
 
@@ -126,68 +120,3 @@ async def delete_note(
 ):
     await service.delete_note(note_id=note_id, user_id=current_user.id)
 
-
-@router.get(
-    "/{note_id}/labels",
-    response_model=list[LabelResponse],
-)
-async def get_labels(
-    note_id: int,
-    current_user: User = Depends(get_current_active_user),
-    service: LabelService = Depends(get_label_service),
-):
-    return await service.get_all_labels(note_id=note_id, user_id=current_user.id)
-
-
-@router.post(
-    "/{note_id}/labels",
-    status_code=status.HTTP_201_CREATED,
-    response_model=LabelResponse,
-)
-async def create_label(
-    note_id: int,
-    label_data: LabelCreate,
-    current_user: User = Depends(get_current_active_user),
-    service: LabelService = Depends(get_label_service),
-):
-    return await service.create_label(
-        note_id=note_id,
-        label_data=label_data,
-        user_id=current_user.id,
-    )
-
-
-@router.put(
-    "/{note_id}/labels/{label_id}",
-    response_model=LabelResponse,
-)
-async def update_label(
-    note_id: int,
-    label_id: int,
-    label_data: LabelUpdate,
-    current_user: User = Depends(get_current_active_user),
-    service: LabelService = Depends(get_label_service),
-):
-    return await service.update_label(
-        note_id=note_id,
-        label_id=label_id,
-        label_data=label_data,
-        user_id=current_user.id,
-    )
-
-
-@router.delete(
-    "/{note_id}/labels/{label_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
-)
-async def delete_label(
-    note_id: int,
-    label_id: int,
-    current_user: User = Depends(get_current_active_user),
-    service: LabelService = Depends(get_label_service),
-):
-    await service.delete_label(
-        note_id=note_id,
-        label_id=label_id,
-        user_id=current_user.id,
-    )

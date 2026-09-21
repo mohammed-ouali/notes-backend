@@ -18,7 +18,6 @@ async def test_user(db_session: AsyncSession, test_user_password: str) -> User:
     user = User(
         email="testuser@example.com",
         password_hash=get_password_hash(test_user_password),
-        username="test_user",
         is_active=True,
     )
     db_session.add(user)
@@ -32,7 +31,6 @@ async def inactive_test_user(db_session: AsyncSession, test_user_password: str) 
     user = User(
         email="inactive@example.com",
         password_hash=get_password_hash(test_user_password),
-        username="inactive_user",
         is_active=False,
     )
     db_session.add(user)
@@ -45,7 +43,6 @@ async def inactive_test_user(db_session: AsyncSession, test_user_password: str) 
 class TestRegisterEndpoint:
     async def test_register_user_success(self, async_client: AsyncClient):
         payload = {
-            "username" : "new_user",
             "email" : "newuser@example.com",
             "password" : "SecretPassword"
         }
@@ -60,7 +57,6 @@ class TestRegisterEndpoint:
 
     async def test_register_duplicate_email(self, async_client: AsyncClient, test_user: User):
         payload = {
-            "username" : "new_user",
             "email" : "testuser@example.com",
             "password" : "SecretPassword"
         }
@@ -71,7 +67,6 @@ class TestRegisterEndpoint:
 
     async def test_register_duplicate_username(self, async_client: AsyncClient, test_user: User):
         payload = {
-            "username" : "test_user",
             "email" : "newuser@example.com",
             "password" : "SecretPassword"
         }
@@ -82,7 +77,6 @@ class TestRegisterEndpoint:
 
     async def test_register_invalid_email(self, async_client: AsyncClient):
         payload = {
-            "username" : "new_user",
             "email" : "invalid_email",
             "password" : "SecretPassword"
         }
@@ -93,7 +87,6 @@ class TestRegisterEndpoint:
 
     async def test_register_invalid_username(self, async_client: AsyncClient):
             payload = {
-                "username" : "invalid*username",
                 "email" : "newuser@example.com",
                 "password" : "SecretPassword"
             }

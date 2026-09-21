@@ -6,7 +6,7 @@ from app.core.exceptions import (
 from app.core.security import get_password_hash, verify_password
 from app.models import User
 from app.repositories.user import UserRepository
-from app.schemas.user import UserCreate, UserUpdate
+from app.schemas.user import UserCreate
 
 
 class UserService:
@@ -38,34 +38,13 @@ class UserService:
                 "Email is already registered"
             )
 
-        if await self.repository.get_by_username(user_data.username):
-            raise UserAlreadyExistsException(
-                "Username is already taken"
-            )
-
         user = User(
-            username=user_data.username,
             email=user_data.email,
             password_hash=get_password_hash(user_data.password),
             is_active=True,
         )
 
         return await self.repository.create(user)
-
-    async def update_user(
-        self,
-        user_id: int,
-        user_data: UserUpdate,
-    ) -> User:
-
-        user = await self.get_user_by_id(user_id)
-
-        if user_data.username != user.username:
-            if await self.repository.get_by_username(user_data.username):
-                raise UserAlreadyExistsException("Username is already taken")
-            user.username = user_data.username
-
-        return await self.repository.update(user)
 
     async def change_password(
         self,

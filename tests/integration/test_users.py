@@ -22,7 +22,6 @@ async def test_user(
     user = User(
         email="testuser@example.com",
         password_hash=get_password_hash(test_user_password),
-        username="test_user",
         is_active=True,
     )
 
@@ -41,7 +40,6 @@ async def inactive_test_user(
     user = User(
         email="inactive@example.com",
         password_hash=get_password_hash(test_user_password),
-        username="inactive_user",
         is_active=False,
     )
 
@@ -60,107 +58,6 @@ def get_auth_headers(user: User) -> dict[str, str]:
     return {
         "Authorization": f"Bearer {access_token}"
     }
-
-
-class TestUpdateCurrentUser:
-
-    async def test_update_current_user_success(
-        self,
-        async_client: AsyncClient,
-        test_user: User,
-    ):
-        payload = {
-            "username": "new_test_user"
-        }
-
-        response = await async_client.put(
-            "/api/v1/users/me",
-            headers=get_auth_headers(test_user),
-            json=payload,
-        )
-
-        assert response.status_code == status.HTTP_200_OK
-
-        data = response.json()
-
-        assert data["id"] == test_user.id
-        assert data["username"] == payload["username"]
-        assert data["email"] == test_user.email
-
-    async def test_update_current_user_missing_body(
-        self,
-        async_client: AsyncClient,
-        test_user: User,
-    ):
-        response = await async_client.put(
-            "/api/v1/users/me",
-            headers=get_auth_headers(test_user),
-            json={},
-        )
-
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-
-    async def test_update_current_user_invalid_username(
-        self,
-        async_client: AsyncClient,
-        test_user: User,
-    ):
-        payload = {
-            "username": "invalid*username"
-        }
-
-        response = await async_client.put(
-            "/api/v1/users/me",
-            headers=get_auth_headers(test_user),
-            json=payload,
-        )
-
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-
-    async def test_update_current_user_existing_username(
-        self,
-        async_client: AsyncClient,
-        db_session: AsyncSession,
-        test_user: User,
-    ):
-        other_user = User(
-            email="other@example.com",
-            password_hash=get_password_hash("SecretPassword"),
-            username="other_user",
-            is_active=True,
-        )
-
-        db_session.add(other_user)
-        await db_session.commit()
-
-        payload = {
-            "username": other_user.username
-        }
-
-        response = await async_client.put(
-            "/api/v1/users/me",
-            headers=get_auth_headers(test_user),
-            json=payload,
-        )
-
-        assert response.status_code == status.HTTP_409_CONFLICT
-
-    async def test_update_current_user_inactive_user(
-        self,
-        async_client: AsyncClient,
-        inactive_test_user: User,
-    ):
-        payload = {
-            "username": "new_inactive_username"
-        }
-
-        response = await async_client.put(
-            "/api/v1/users/me",
-            headers=get_auth_headers(inactive_test_user),
-            json=payload,
-        )
-
-        assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 class TestChangePassword:

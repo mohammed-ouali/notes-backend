@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, status
 from app.api.dependencies.auth import get_current_active_user
 from app.api.dependencies.services import get_user_service
 from app.models import User
-from app.schemas.user import ChangePasswordRequest, UserResponse, UserUpdate
+from app.schemas.user import ChangePasswordRequest, UserResponse
 from app.services.user import UserService
 
 router = APIRouter(
@@ -21,20 +21,6 @@ async def get_current_user_profile(
 ):
     return current_user
 
-
-@router.put(
-    "/me",
-    response_model=UserResponse,
-)
-async def update_current_user_profile(
-    user_data: UserUpdate,
-    current_user: User = Depends(get_current_active_user),
-    service: UserService = Depends(get_user_service),
-):
-    return await service.update_user(
-        user_id=current_user.id,
-        user_data=user_data,
-    )
 
 
 @router.post(

@@ -13,22 +13,7 @@ from pydantic import (
 
 
 class UserBase(BaseModel):
-    username: str = Field(
-        ...,
-        min_length=3,
-        max_length=50,
-        pattern=r"^[a-zA-Z0-9_-]+$",
-    )
     email: EmailStr
-
-    @field_validator("username")
-    @classmethod
-    def sanitize_and_validate_username(cls, value: str) -> str:
-        trimmed_value = value.strip()
-        reserved_usernames = {"admin", "root", "system", "superuser", "administrator"}
-        if trimmed_value.lower() in reserved_usernames:
-            raise ValueError(f"The username '{trimmed_value}' is reserved and cannot be used.")
-        return trimmed_value
 
 
 class UserCreate(UserBase):
@@ -37,24 +22,6 @@ class UserCreate(UserBase):
         min_length=8,
         max_length=128,
     )
-
-
-class UserUpdate(BaseModel):
-    username: str = Field(
-        ...,
-        min_length=3,
-        max_length=50,
-        pattern=r"^[a-zA-Z0-9_-]+$",
-    )
-
-    @field_validator("username")
-    @classmethod
-    def sanitize_and_validate_username(cls, value: str) -> str:
-        trimmed_value = value.strip()
-        reserved_usernames = {"admin", "root", "system", "superuser", "administrator"}
-        if trimmed_value.lower() in reserved_usernames:
-            raise ValueError(f"The username '{trimmed_value}' is reserved and cannot be used.")
-        return trimmed_value
 
 
 class ChangePasswordRequest(BaseModel):

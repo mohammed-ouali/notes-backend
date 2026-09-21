@@ -21,7 +21,6 @@ async def test_user(
     user = User(
         email="testuser@example.com",
         password_hash=get_password_hash(test_user_password),
-        username="test_user",
         is_active=True,
     )
 
@@ -40,7 +39,6 @@ async def inactive_test_user(
     user = User(
         email="inactive@example.com",
         password_hash=get_password_hash(test_user_password),
-        username="inactive_user",
         is_active=False,
     )
 
@@ -58,7 +56,6 @@ async def other_test_user(
     user = User(
         email="other@example.com",
         password_hash=get_password_hash("SecretPassword"),
-        username="other_user",
         is_active=True,
     )
 

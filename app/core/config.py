@@ -16,6 +16,13 @@ class Settings(BaseSettings):
     log_file_path: str
     log_rotation: str
     log_retention: str
+    minio_endpoint: str
+    minio_access_key: str
+    minio_secret_key: str
+    minio_bucket_name: str
+    minio_secure: bool = False
+    max_attachment_size_bytes: int = 10 * 1024 * 1024     
+    max_note_attachments_size_bytes: int = 20 * 1024 * 1024
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

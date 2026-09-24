@@ -1,7 +1,7 @@
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 
-class AtttachmentResponse(BaseModel):
+class AttachmentResponse(BaseModel):
     id: int
     file_name: str
     content_type: str

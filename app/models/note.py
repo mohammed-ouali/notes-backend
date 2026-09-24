@@ -46,6 +46,11 @@ class Note(Base):
         back_populates="notes"
     )
 
+    attachments: Mapped["Attachment"] = relationship(
+        back_populates="note",
+        cascade="all, delete-orphan"
+    )
+
     
 
     

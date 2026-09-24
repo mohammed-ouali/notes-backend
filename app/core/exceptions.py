@@ -81,6 +81,22 @@ class InvalidPasswordException(DomainException):
     def __init__(self, message: str = "Invalid password"):
         super().__init__(message=message)
 
+class AttachmentNotFoundException(DomainException):    
+    def __init__(self, message: str = "Attachment not found."):        
+        super().__init__(message)
+
+class FileTooLargeException(DomainException):    
+    def __init__(self, message: str = "File size exceeds the allowed limit."):        
+        super().__init__(message)
+
+class NoteStorageLimitExceededException(DomainException):   
+    def __init__(self, message: str = "Note attachment storage limit exceeded."):        
+        super().__init__(message)
+
+class UnsupportedFileTypeException(DomainException):    
+    def __init__(self, message: str = "Unsupported file type."):        
+        super().__init__(message)
+
 DOMAIN_EXCEPTION_MAP: dict[type[DomainException], tuple[int, str]] = {
     UserNotFoundException: (status.HTTP_404_NOT_FOUND, "User Not Found"),
     FolderNotFoundException: (status.HTTP_404_NOT_FOUND, "Folder Not Found"),
@@ -93,5 +109,11 @@ DOMAIN_EXCEPTION_MAP: dict[type[DomainException], tuple[int, str]] = {
     InvalidTokenException: (status.HTTP_401_UNAUTHORIZED, "Invalid Token"),
     UserInactiveException: (status.HTTP_403_FORBIDDEN, "User Inactive"),
     InvalidPasswordException: (status.HTTP_400_BAD_REQUEST, "Invalid Password"),
+    AttachmentNotFoundException: (404, "Attachment Not Found"),
+    UnsupportedFileTypeException: (400, "Unsupported File Type"),
+    FileTooLargeException: (413, "File Too Large"),
+    NoteStorageLimitExceededException: (413, "Note Storage Limit Exceeded"),
     DomainException: (status.HTTP_400_BAD_REQUEST, "Bad Request"),
 }
+
+

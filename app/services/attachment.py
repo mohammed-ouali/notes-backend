@@ -24,15 +24,15 @@ class AttachmentService:
         self.storage = storage
 
     async def get_all_attachments_by_note(self, user_id: int, note_id: int) -> list[Attachment]:
-        note = await self.note_repository.get_by_id_and_user_id(note_id=note_id, user_id=user_id)
+        note = await self.note_repository.get_by_id(note_id=note_id, user_id=user_id)
 
         if note is None:
             raise NoteNotFoundException(f"Note with the ID {note_id} not found")
     
         return await self.attachment_repository.get_by_note_id(note_id)
 
-    async def get_attachment_by_id(self, user_id: int, note_id: int, attachment_id: int) -> AsyncIterator[bytes] :
-        note = await self.note_repository.get_by_id_and_user_id(note_id=note_id, user_id=user_id)
+    async def get_attachment_by_id(self, user_id: int, note_id: int, attachment_id: int) -> tuple[Attachment, AsyncIterator[bytes]] :
+        note = await self.note_repository.get_by_id(note_id=note_id, user_id=user_id)
         
         if note is None:
             raise NoteNotFoundException(f"Note with the ID {note_id} not found")
@@ -41,11 +41,13 @@ class AttachmentService:
         if attachment is None or attachment.note_id != note_id:
             raise AttachmentNotFoundException(f"Attachment with the ID {attachment_id} not found")
 
-        return self.storage.get(attachment.object_key)
+        stream = self.storage.get(attachment.object_key)
+
+        return attachment, stream
 
 
     async def upload_attachment(self, user_id: int, note_id: int, file: UploadFile) -> Attachment:
-        note = await self.note_repository.get_by_id_and_user_id(note_id=note_id, user_id=user_id)
+        note = await self.note_repository.get_by_id(note_id=note_id, user_id=user_id)
         if note is None:
             raise NoteNotFoundException(f"Note with the ID {note_id} not found")
 
@@ -91,7 +93,7 @@ class AttachmentService:
 
 
     async def delete_attachment(self, user_id: int, note_id: int, attachment_id: int) -> None:
-        note = await self.note_repository.get_by_id_and_user_id(note_id=note_id, user_id=user_id)
+        note = await self.note_repository.get_by_id(note_id=note_id, user_id=user_id)
     
         if note is None:
             raise NoteNotFoundException(f"Note with the ID {note_id} not found")

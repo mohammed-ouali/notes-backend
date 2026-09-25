@@ -4,6 +4,7 @@ from fastapi.exceptions import RequestValidationError
 from app.core.exceptions import DomainException
 from app.core.config import settings
 from app.core.logging import setup_logging
+from app.core.storage import Storage
 from app.api.v1.router import api_router
 from app.middlewares.logging import LoggingMiddleware
 from app.core.exception_handlers import (
@@ -13,6 +14,9 @@ from app.core.exception_handlers import (
 )
 
 setup_logging()
+
+storage = Storage()
+storage.create_bucket_if_not_exists()
 
 app = FastAPI(
     title=settings.app_name,

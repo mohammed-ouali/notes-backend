@@ -24,12 +24,12 @@ class Storage:
         )
         self.bucket_name = settings.minio_bucket_name
 
-    async def create_bucket_if_not_exists(self) -> None:
+    def create_bucket_if_not_exists(self) -> None:
         try:
-            bucket_exists = await asyncio.to_thread(self.client.bucket_exists, self.bucket_name)
+            bucket_exists = self.client.bucket_exists(self.bucket_name)
     
             if not bucket_exists:
-                await asyncio.to_thread(self.client.make_bucket, self.bucket_name)
+                self.client.make_bucket(self.bucket_name)
     
         except S3Error as exception:
             raise StorageError(f"Failed to initialize storage bucket: {self.bucket_name}") from exception

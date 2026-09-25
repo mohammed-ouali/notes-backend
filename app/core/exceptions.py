@@ -109,10 +109,10 @@ DOMAIN_EXCEPTION_MAP: dict[type[DomainException], tuple[int, str]] = {
     InvalidTokenException: (status.HTTP_401_UNAUTHORIZED, "Invalid Token"),
     UserInactiveException: (status.HTTP_403_FORBIDDEN, "User Inactive"),
     InvalidPasswordException: (status.HTTP_400_BAD_REQUEST, "Invalid Password"),
-    AttachmentNotFoundException: (404, "Attachment Not Found"),
-    UnsupportedFileTypeException: (400, "Unsupported File Type"),
-    FileTooLargeException: (413, "File Too Large"),
-    NoteStorageLimitExceededException: (413, "Note Storage Limit Exceeded"),
+    AttachmentNotFoundException: (status.HTTP_404_NOT_FOUND, "Attachment Not Found"),
+    UnsupportedFileTypeException: (status.HTTP_400_BAD_REQUEST, "Unsupported File Type"),
+    FileTooLargeException: (status.HTTP_413_CONTENT_TOO_LARGE, "File Too Large"),
+    NoteStorageLimitExceededException: (status.HTTP_413_CONTENT_TOO_LARGE, "Note Storage Limit Exceeded"),
     DomainException: (status.HTTP_400_BAD_REQUEST, "Bad Request"),
 }
 

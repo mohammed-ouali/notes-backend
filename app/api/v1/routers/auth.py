@@ -1,6 +1,6 @@
-from fastapi import Depends, status, APIRouter
-from app.api.dependencies.services import get_auth_service
-
+from fastapi import Depends, status, APIRouter, BackgroundTasks
+from app.api.dependencies.services import get_auth_service, get_email_service
+from app.core.email import EmailService
 from app.schemas.auth import LoginRequest, RefreshTokenRequest, Token
 from app.schemas.user import UserCreate
 from app.services.auth import AuthService
@@ -18,9 +18,15 @@ router = APIRouter(
 )
 async def register(
     user_data: UserCreate,
+    background_tasks : BackgroundTasks,
     service: AuthService = Depends(get_auth_service),
+    email_service: EmailService = Depends((get_email_service))
 ):
-    return await service.register_user(user_data)
+    token = await service.register_user(user_data)
+
+    background_tasks.add_task(email_service.send_welcome_email, user_data.email)
+
+    return token
 
 
 @router.post(

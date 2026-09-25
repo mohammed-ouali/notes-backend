@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.dependencies.database import get_db
 
 from app.core.storage import Storage
+from app.core.email import EmailService
 from app.services.auth import AuthService 
 from app.services.user import UserService
 from app.services.folder import FolderService
@@ -63,3 +64,7 @@ def get_attachment_service(
         note_repository=note_repository,
         storage=storage
     )
+
+
+def get_email_service() -> EmailService:
+    return EmailService()

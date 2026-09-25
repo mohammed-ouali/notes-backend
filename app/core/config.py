@@ -23,6 +23,11 @@ class Settings(BaseSettings):
     minio_secure: bool = False
     max_attachment_size_bytes: int      
     max_note_attachments_size_bytes: int 
+    smtp_host: str
+    smtp_port: int
+    smtp_username: str
+    smtp_password: str
+    smtp_from: str
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

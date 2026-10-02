@@ -10,11 +10,11 @@ class EmailService:
     def _send_welcome_email(self, to_email: str) -> None:
         message = EmailMessage()
 
-        message["Subject"] = "Welcome to notes app"
+        message["Subject"] = "Welcome Email"
         message["From"] = settings.smtp_from
         message["To"] = to_email
 
-        message.set_content(f"Welcome to notes app, the place that holds your secrets\nFor anny support contact: {settings.smtp_from}")
+        message.set_content("Welcome to the notes app")
 
         with smtplib.SMTP(settings.smtp_host, settings.smtp_port) as smtp:
             smtp.starttls()

@@ -153,7 +153,7 @@ async def create_folder(
     return await service.create_folder(folder_data, user_id=current_user.id)
 
 
-@router.put(
+@router.patch(
     "/{folder_id}",
     response_model=FolderResponse,
 )

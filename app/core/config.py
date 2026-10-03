@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     smtp_username: str
     smtp_password: str
     smtp_from: str
+    rate_limit_auth: int
+    rate_limit_default: int
+    rate_limit_window_seconds: int
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

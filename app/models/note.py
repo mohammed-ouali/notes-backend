@@ -24,7 +24,7 @@ class Note(Base):
 
     title: Mapped[str] = mapped_column(String(255))
 
-    content: Mapped[str] = mapped_column(Text)
+    content: Mapped[str] = mapped_column(Text, nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

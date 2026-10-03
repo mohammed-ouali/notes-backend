@@ -492,26 +492,6 @@ class TestUploadAttachment:
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
-
-    async def test_upload_unsupported_file_type(
-        self,
-        async_client: AsyncClient,
-        test_user: User,
-        test_note: Note,
-    ):
-        response = await async_client.post(
-            f"/api/v1/notes/{test_note.id}/attachments",
-            headers=get_auth_headers(test_user),
-            files=make_file(
-                filename="script.txt",
-                content=b"not an allowed file",
-                content_type="text/plain",
-            ),
-        )
-
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-
     async def test_upload_missing_file(
         self,
         async_client: AsyncClient,

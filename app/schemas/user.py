@@ -12,7 +12,7 @@ from pydantic import (
 
 
 class UserBase(BaseModel):
-    email: EmailStr
+    email: EmailStr = Field(description="Email address associated with the account.")
 
 
 class UserCreate(UserBase):
@@ -20,12 +20,19 @@ class UserCreate(UserBase):
         ...,
         min_length=8,
         max_length=128,
+        description="Password for the account.",
     )
 
 
 class ChangePasswordRequest(BaseModel):
-    old_password: str = Field(..., min_length=8, max_length=128)
-    new_password: str = Field(..., min_length=8, max_length=128)
+    old_password: str = Field(
+        ..., min_length=8, max_length=128,
+        description="Current account password.",
+    )
+    new_password: str = Field(
+        ..., min_length=8, max_length=128,
+        description="Replacement account password; it must differ from the current password.",
+    )
 
     @model_validator(mode="after")
     def validate_passwords_differ(self) -> ChangePasswordRequest:
@@ -35,8 +42,8 @@ class ChangePasswordRequest(BaseModel):
 
 
 class UserResponse(UserBase):
-    id: int
-    created_at: datetime
-    is_active: bool
+    id: int = Field(description="Unique identifier of the account.")
+    created_at: datetime = Field(description="Date and time the account was created.")
+    is_active: bool = Field(description="Whether the account is active.")
 
     model_config = ConfigDict(from_attributes=True)

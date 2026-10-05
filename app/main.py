@@ -22,11 +22,34 @@ storage.create_bucket_if_not_exists()
 
 app = FastAPI(
     title=settings.app_name,
+    description=(
+        "A REST API for managing notes, folders, and file attachments, with "
+        "account registration and token-based authentication. Protected "
+        "resources require authentication."
+    ),
     version=settings.api_version,
+    openapi_tags=[
+        {
+            "name": "Authentication",
+            "description": "Register accounts, sign in, and refresh access tokens.",
+        },
+        {
+            "name": "Users",
+            "description": "View and manage the authenticated user's account.",
+        },
+        {
+            "name": "Notes",
+            "description": "Create, find, and manage notes and their attachments.",
+        },
+        {
+            "name": "Folders",
+            "description": "Organize notes in folders and nested folders.",
+        },
+    ],
     debug=settings.debug
 )
 
-@app.get("/")
+@app.get("/", summary="Check API availability", description="Confirm that the API is running.")
 async def root():
     return {"message": "API is running"}
 

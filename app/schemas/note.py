@@ -10,8 +10,9 @@ class NoteBase(BaseModel):
         ...,
         min_length=1,
         max_length=255,
+        description="Note title.",
     )
-    content: str | None = None
+    content: str | None = Field(default=None, description="Optional text content of the note.")
 
     @field_validator("title")
     @classmethod
@@ -33,7 +34,9 @@ class NoteBase(BaseModel):
 
 
 class NoteCreate(NoteBase):
-    folder_id: int | None = Field(None, gt=0)
+    folder_id: int | None = Field(
+        None, gt=0, description="ID of the folder to place the note in, if any."
+    )
 
 
 class NoteUpdate(BaseModel):
@@ -41,9 +44,12 @@ class NoteUpdate(BaseModel):
         None,
         min_length=1,
         max_length=255,
+        description="Updated note title.",
     )
-    content: str | None = None
-    folder_id: int | None = Field(None, gt=0)
+    content: str | None = Field(default=None, description="Updated note content.")
+    folder_id: int | None = Field(
+        None, gt=0, description="ID of the folder to place the note in, or null to remove it from a folder."
+    )
 
     @field_validator("title")
     @classmethod
@@ -75,10 +81,10 @@ class NoteUpdate(BaseModel):
 
 
 class NoteResponse(NoteBase):
-    id: int
-    user_id: int
-    folder_id: int | None
-    created_at: datetime
-    updated_at: datetime
+    id: int = Field(description="Unique identifier of the note.")
+    user_id: int = Field(description="Identifier of the note's owner.")
+    folder_id: int | None = Field(description="Identifier of the containing folder, if any.")
+    created_at: datetime = Field(description="Date and time the note was created.")
+    updated_at: datetime = Field(description="Date and time the note was last updated.")
 
     model_config = ConfigDict(from_attributes=True)

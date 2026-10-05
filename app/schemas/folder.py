@@ -10,7 +10,7 @@ class FolderBase(BaseModel):
         ...,
         min_length=1,
         max_length=128,
-        description="Folder name must be between 1 and 128 characters long.",
+        description="Name of the folder.",
     )
 
     @field_validator("name")
@@ -23,12 +23,16 @@ class FolderBase(BaseModel):
 
 
 class FolderCreate(FolderBase):
-    parent_id: int | None = Field(None, gt=0)
+    parent_id: int | None = Field(
+        None, gt=0, description="ID of the parent folder, if this is a nested folder."
+    )
 
 
 class FolderUpdate(BaseModel):
-    name: str | None = Field(None, min_length=1, max_length=128)
-    parent_id: int | None = Field(None, gt=0)
+    name: str | None = Field(None, min_length=1, max_length=128, description="Updated folder name.")
+    parent_id: int | None = Field(
+        None, gt=0, description="ID of the new parent folder, or null to make this a top-level folder."
+    )
 
     @field_validator("name")
     @classmethod
@@ -48,10 +52,10 @@ class FolderUpdate(BaseModel):
 
 
 class FolderResponse(FolderBase):
-    id: int
-    user_id: int
-    parent_id: int | None
-    created_at: datetime
-    updated_at: datetime
+    id: int = Field(description="Unique identifier of the folder.")
+    user_id: int = Field(description="Identifier of the folder's owner.")
+    parent_id: int | None = Field(description="Identifier of the parent folder, if any.")
+    created_at: datetime = Field(description="Date and time the folder was created.")
+    updated_at: datetime = Field(description="Date and time the folder was last updated.")
 
     model_config = ConfigDict(from_attributes=True)

@@ -116,7 +116,7 @@ def get_auth_headers(user: User) -> dict[str, str]:
 
 def make_file(
     filename: str = "test.pdf",
-    content: bytes = b"test file content",
+    content: bytes = b"%PDF-1.7\\nTest PDF content",
     content_type: str = "application/pdf",
 ):
     return {
@@ -175,7 +175,7 @@ class TestGetAttachments:
         assert data[0]["id"] == attachment["id"]
         assert data[0]["file_name"] == "test.pdf"
         assert data[0]["content_type"] == "application/pdf"
-        assert data[0]["size_bytes"] == len(b"test file content")
+        assert data[0]["size_bytes"] == len(b"%PDF-1.7\\nTest PDF content")
 
 
     async def test_get_attachments_without_auth(
@@ -240,7 +240,7 @@ class TestGetAttachment:
         test_user: User,
         test_note: Note,
     ):
-        content = b"PDF file content"
+        content = b"%PDF-1.7\\nPDF file content"
 
         upload_response = await async_client.post(
             f"/api/v1/notes/{test_note.id}/attachments",
@@ -375,7 +375,7 @@ class TestUploadAttachment:
         test_user: User,
         test_note: Note,
     ):
-        content = b"test PDF content"
+        content = b"%PDF-1.7\\ntest PDF content"
 
         response = await async_client.post(
             f"/api/v1/notes/{test_note.id}/attachments",
@@ -396,59 +396,6 @@ class TestUploadAttachment:
         assert data["size_bytes"] == len(content)
         assert "id" in data
         assert "created_at" in data
-
-
-    async def test_upload_png_success(
-        self,
-        async_client: AsyncClient,
-        test_user: User,
-        test_note: Note,
-    ):
-        content = b"fake png content"
-
-        response = await async_client.post(
-            f"/api/v1/notes/{test_note.id}/attachments",
-            headers=get_auth_headers(test_user),
-            files=make_file(
-                filename="image.png",
-                content=content,
-                content_type="image/png",
-            ),
-        )
-
-        assert response.status_code == status.HTTP_201_CREATED
-
-        data = response.json()
-
-        assert data["file_name"] == "image.png"
-        assert data["content_type"] == "image/png"
-        assert data["size_bytes"] == len(content)
-
-
-    async def test_upload_jpeg_success(
-        self,
-        async_client: AsyncClient,
-        test_user: User,
-        test_note: Note,
-    ):
-        content = b"fake jpeg content"
-
-        response = await async_client.post(
-            f"/api/v1/notes/{test_note.id}/attachments",
-            headers=get_auth_headers(test_user),
-            files=make_file(
-                filename="image.jpg",
-                content=content,
-                content_type="image/jpeg",
-            ),
-        )
-
-        assert response.status_code == status.HTTP_201_CREATED
-
-        data = response.json()
-
-        assert data["file_name"] == "image.jpg"
-        assert data["content_type"] == "image/jpeg"
 
 
     async def test_upload_without_auth(
@@ -512,7 +459,7 @@ class TestUploadAttachment:
         test_user: User,
         test_note: Note,
     ):
-        content = b"x" * (settings.max_attachment_size_bytes + 1)
+        content = b"%PDF-" + b"x" * (settings.max_attachment_size_bytes + 1 - len(b"%PDF-"))
 
         response = await async_client.post(
             f"/api/v1/notes/{test_note.id}/attachments",
@@ -532,7 +479,7 @@ class TestUploadAttachment:
         test_user: User,
         test_note: Note,
     ):
-        content = b"x" * settings.max_attachment_size_bytes
+        content = b"%PDF-" + b"x" * (settings.max_attachment_size_bytes - len(b"%PDF-"))
 
         response = await async_client.post(
             f"/api/v1/notes/{test_note.id}/attachments",
@@ -563,7 +510,7 @@ class TestUploadAttachment:
             headers=get_auth_headers(test_user),
             files=make_file(
                 filename="first.pdf",
-                content=b"x" * max_file_size,
+                content=b"%PDF-" + b"x" * (max_file_size - len(b"%PDF-")),
             ),
         )
 
@@ -574,7 +521,7 @@ class TestUploadAttachment:
             headers=get_auth_headers(test_user),
             files=make_file(
                 filename="second.pdf",
-                content=b"x" * max_file_size,
+                content=b"%PDF-" + b"x" * (max_file_size - len(b"%PDF-")),
             ),
         )
 
@@ -585,7 +532,7 @@ class TestUploadAttachment:
             headers=get_auth_headers(test_user),
             files=make_file(
                 filename="third.pdf",
-                content=b"x",
+                content=b"%PDF-",
             ),
         )
 
@@ -608,7 +555,7 @@ class TestUploadAttachment:
             headers=get_auth_headers(test_user),
             files=make_file(
                 filename="first.pdf",
-                content=b"x" * max_file_size,
+                content=b"%PDF-" + b"x" * (max_file_size - len(b"%PDF-")),
             ),
         )
 
@@ -619,7 +566,7 @@ class TestUploadAttachment:
             headers=get_auth_headers(test_user),
             files=make_file(
                 filename="second.pdf",
-                content=b"x" * max_file_size,
+                content=b"%PDF-" + b"x" * (max_file_size - len(b"%PDF-")),
             ),
         )
 
@@ -641,11 +588,8 @@ class TestUploadAttachment:
             ),
         )
 
-        assert response.status_code == status.HTTP_201_CREATED
-
-        data = response.json()
-
-        assert data["size_bytes"] == 0
+        # Empty files have no valid PDF signature and should be rejected.
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
     

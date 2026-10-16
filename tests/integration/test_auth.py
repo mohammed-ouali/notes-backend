@@ -5,7 +5,7 @@ from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import User
-from app.core.security import get_password_hash, create_access_token, create_refresh_token
+from app.core.security import get_password_hash, create_refresh_token
 
 
 @pytest.fixture
@@ -27,7 +27,9 @@ async def test_user(db_session: AsyncSession, test_user_password: str) -> User:
 
 
 @pytest_asyncio.fixture
-async def inactive_test_user(db_session: AsyncSession, test_user_password: str) -> User:
+async def inactive_test_user(
+    db_session: AsyncSession, test_user_password: str
+) -> User:
     user = User(
         email="inactive@example.com",
         password_hash=get_password_hash(test_user_password),
@@ -43,11 +45,13 @@ async def inactive_test_user(db_session: AsyncSession, test_user_password: str) 
 class TestRegisterEndpoint:
     async def test_register_user_success(self, async_client: AsyncClient):
         payload = {
-            "email" : "newuser@example.com",
-            "password" : "SecretPassword"
+            "email": "newuser@example.com",
+            "password": "SecretPassword",
         }
 
-        response = await async_client.post("/api/v1/auth/register", json=payload)
+        response = await async_client.post(
+            "/api/v1/auth/register", json=payload
+        )
 
         assert response.status_code == status.HTTP_201_CREATED
         data = response.json()
@@ -55,51 +59,35 @@ class TestRegisterEndpoint:
         assert "refresh_token" in data
         assert data["token_type"] == "bearer"
 
-    async def test_register_duplicate_email(self, async_client: AsyncClient, test_user: User):
+    async def test_register_duplicate_email(
+        self, async_client: AsyncClient, test_user: User
+    ):
         payload = {
-            "email" : "testuser@example.com",
-            "password" : "SecretPassword"
+            "email": test_user.email,
+            "password": "SecretPassword",
         }
 
-        response = await async_client.post("/api/v1/auth/register", json=payload)
-
-        assert response.status_code == status.HTTP_409_CONFLICT
-
-    async def test_register_duplicate_username(self, async_client: AsyncClient, test_user: User):
-        payload = {
-            "email" : "newuser@example.com",
-            "password" : "SecretPassword"
-        }
-
-        response = await async_client.post("/api/v1/auth/register", json=payload)
+        response = await async_client.post(
+            "/api/v1/auth/register", json=payload
+        )
 
         assert response.status_code == status.HTTP_409_CONFLICT
 
     async def test_register_invalid_email(self, async_client: AsyncClient):
         payload = {
-            "email" : "invalid_email",
-            "password" : "SecretPassword"
+            "email": "invalid_email",
+            "password": "SecretPassword",
         }
 
-        response = await async_client.post("/api/v1/auth/register", json=payload)
+        response = await async_client.post(
+            "/api/v1/auth/register", json=payload
+        )
 
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-
-    async def test_register_invalid_username(self, async_client: AsyncClient):
-            payload = {
-                "email" : "newuser@example.com",
-                "password" : "SecretPassword"
-            }
-    
-            response = await async_client.post("/api/v1/auth/register", json=payload)
-    
-            assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-
 
 
 @pytest.mark.asyncio
 class TestLoginEndpoint:
-
     async def test_login_success(
         self,
         async_client: AsyncClient,
@@ -117,9 +105,7 @@ class TestLoginEndpoint:
         )
 
         assert response.status_code == status.HTTP_200_OK
-
         data = response.json()
-
         assert "access_token" in data
         assert "refresh_token" in data
         assert data["token_type"] == "bearer"
@@ -178,7 +164,6 @@ class TestLoginEndpoint:
 
 @pytest.mark.asyncio
 class TestRefreshEndpoint:
-
     async def test_refresh_success(
         self,
         async_client: AsyncClient,
@@ -198,9 +183,7 @@ class TestRefreshEndpoint:
         )
 
         assert response.status_code == status.HTTP_200_OK
-
         data = response.json()
-
         assert "access_token" in data
         assert "refresh_token" in data
         assert data["token_type"] == "bearer"

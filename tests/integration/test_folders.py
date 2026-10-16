@@ -84,25 +84,17 @@ async def test_folder(
 
 
 def get_auth_headers(user: User) -> dict[str, str]:
-    access_token = create_access_token(
-        subject=str(user.id)
-    )
-
-    return {
-        "Authorization": f"Bearer {access_token}"
-    }
+    access_token = create_access_token(subject=str(user.id))
+    return {"Authorization": f"Bearer {access_token}"}
 
 
 class TestCreateFolder:
-
     async def test_create_folder_success(
         self,
         async_client: AsyncClient,
         test_user: User,
     ):
-        payload = {
-            "name": "New Folder",
-        }
+        payload = {"name": "New Folder"}
 
         response = await async_client.post(
             "/api/v1/folders",
@@ -111,9 +103,7 @@ class TestCreateFolder:
         )
 
         assert response.status_code == status.HTTP_201_CREATED
-
         data = response.json()
-
         assert data["user_id"] == test_user.id
         assert data["name"] == payload["name"]
         assert data["parent_id"] is None
@@ -124,10 +114,7 @@ class TestCreateFolder:
         test_user: User,
         test_folder: Folder,
     ):
-        payload = {
-            "name": "Child Folder",
-            "parent_id": test_folder.id,
-        }
+        payload = {"name": "Child Folder", "parent_id": test_folder.id}
 
         response = await async_client.post(
             "/api/v1/folders",
@@ -136,9 +123,7 @@ class TestCreateFolder:
         )
 
         assert response.status_code == status.HTTP_201_CREATED
-
         data = response.json()
-
         assert data["user_id"] == test_user.id
         assert data["name"] == payload["name"]
         assert data["parent_id"] == test_folder.id
@@ -149,14 +134,10 @@ class TestCreateFolder:
         test_user: User,
         test_folder: Folder,
     ):
-        payload = {
-            "name": test_folder.name,
-        }
-
         response = await async_client.post(
             "/api/v1/folders",
             headers=get_auth_headers(test_user),
-            json=payload,
+            json={"name": test_folder.name},
         )
 
         assert response.status_code == status.HTTP_409_CONFLICT
@@ -166,15 +147,10 @@ class TestCreateFolder:
         async_client: AsyncClient,
         test_user: User,
     ):
-        payload = {
-            "name": "New Folder",
-            "parent_id": 999999,
-        }
-
         response = await async_client.post(
             "/api/v1/folders",
             headers=get_auth_headers(test_user),
-            json=payload,
+            json={"name": "New Folder", "parent_id": 999999},
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -184,38 +160,28 @@ class TestCreateFolder:
         async_client: AsyncClient,
         inactive_test_user: User,
     ):
-        payload = {
-            "name": "New Folder",
-        }
-
         response = await async_client.post(
             "/api/v1/folders",
             headers=get_auth_headers(inactive_test_user),
-            json=payload,
+            json={"name": "New Folder"},
         )
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 class TestGetFolders:
-
     async def test_get_folders_success(
         self,
         async_client: AsyncClient,
         db_session: AsyncSession,
         test_user: User,
     ):
-        first_folder = Folder(
-            user_id=test_user.id,
-            name="First Folder",
+        db_session.add_all(
+            [
+                Folder(user_id=test_user.id, name="First Folder"),
+                Folder(user_id=test_user.id, name="Second Folder"),
+            ]
         )
-
-        second_folder = Folder(
-            user_id=test_user.id,
-            name="Second Folder",
-        )
-
-        db_session.add_all([first_folder, second_folder])
         await db_session.commit()
 
         response = await async_client.get(
@@ -224,9 +190,7 @@ class TestGetFolders:
         )
 
         assert response.status_code == status.HTTP_200_OK
-
         data = response.json()
-
         assert data["total"] == 2
         assert len(data["items"]) == 2
 
@@ -241,9 +205,7 @@ class TestGetFolders:
         )
 
         assert response.status_code == status.HTTP_200_OK
-
         data = response.json()
-
         assert data["total"] == 0
         assert data["items"] == []
 
@@ -253,15 +215,12 @@ class TestGetFolders:
         db_session: AsyncSession,
         test_user: User,
     ):
-        folders = [
-            Folder(
-                user_id=test_user.id,
-                name=f"Folder {index}",
-            )
-            for index in range(3)
-        ]
-
-        db_session.add_all(folders)
+        db_session.add_all(
+            [
+                Folder(user_id=test_user.id, name=f"Folder {index}")
+                for index in range(3)
+            ]
+        )
         await db_session.commit()
 
         response = await async_client.get(
@@ -270,9 +229,7 @@ class TestGetFolders:
         )
 
         assert response.status_code == status.HTTP_200_OK
-
         data = response.json()
-
         assert data["total"] == 3
         assert len(data["items"]) == 2
         assert data["page"] == 1
@@ -284,17 +241,12 @@ class TestGetFolders:
         db_session: AsyncSession,
         test_user: User,
     ):
-        matching_folder = Folder(
-            user_id=test_user.id,
-            name="Python Backend",
+        db_session.add_all(
+            [
+                Folder(user_id=test_user.id, name="Python Backend"),
+                Folder(user_id=test_user.id, name="Database"),
+            ]
         )
-
-        other_folder = Folder(
-            user_id=test_user.id,
-            name="Database",
-        )
-
-        db_session.add_all([matching_folder, other_folder])
         await db_session.commit()
 
         response = await async_client.get(
@@ -303,9 +255,7 @@ class TestGetFolders:
         )
 
         assert response.status_code == status.HTTP_200_OK
-
         data = response.json()
-
         assert data["total"] == 1
         assert data["items"][0]["name"] == "Python Backend"
 
@@ -315,17 +265,12 @@ class TestGetFolders:
         db_session: AsyncSession,
         test_user: User,
     ):
-        first_folder = Folder(
-            user_id=test_user.id,
-            name="Zebra",
+        db_session.add_all(
+            [
+                Folder(user_id=test_user.id, name="Zebra"),
+                Folder(user_id=test_user.id, name="Apple"),
+            ]
         )
-
-        second_folder = Folder(
-            user_id=test_user.id,
-            name="Apple",
-        )
-
-        db_session.add_all([first_folder, second_folder])
         await db_session.commit()
 
         response = await async_client.get(
@@ -334,15 +279,12 @@ class TestGetFolders:
         )
 
         assert response.status_code == status.HTTP_200_OK
-
         data = response.json()
-
         assert len(data["items"]) == 2
         assert data["items"][0]["name"] == "Apple"
 
 
 class TestGetFolder:
-
     async def test_get_folder_success(
         self,
         async_client: AsyncClient,
@@ -355,9 +297,7 @@ class TestGetFolder:
         )
 
         assert response.status_code == status.HTTP_200_OK
-
         data = response.json()
-
         assert data["id"] == test_folder.id
         assert data["user_id"] == test_user.id
         assert data["name"] == test_folder.name
@@ -382,11 +322,7 @@ class TestGetFolder:
         other_test_user: User,
         test_user: User,
     ):
-        folder = Folder(
-            user_id=other_test_user.id,
-            name="Private Folder",
-        )
-
+        folder = Folder(user_id=other_test_user.id, name="Private Folder")
         db_session.add(folder)
         await db_session.commit()
         await db_session.refresh(folder)
@@ -400,7 +336,6 @@ class TestGetFolder:
 
 
 class TestGetFolderChildren:
-
     async def test_get_children_success(
         self,
         async_client: AsyncClient,
@@ -413,7 +348,6 @@ class TestGetFolderChildren:
             parent_id=test_folder.id,
             name="Child Folder",
         )
-
         db_session.add(child_folder)
         await db_session.commit()
 
@@ -423,9 +357,7 @@ class TestGetFolderChildren:
         )
 
         assert response.status_code == status.HTTP_200_OK
-
         data = response.json()
-
         assert len(data) == 1
         assert data[0]["id"] == child_folder.id
         assert data[0]["name"] == child_folder.name
@@ -445,7 +377,6 @@ class TestGetFolderChildren:
 
 
 class TestGetFolderNotes:
-
     async def test_get_folder_notes_success(
         self,
         async_client: AsyncClient,
@@ -459,7 +390,6 @@ class TestGetFolderNotes:
             title="Folder Note",
             content="Note content",
         )
-
         db_session.add(note)
         await db_session.commit()
 
@@ -469,9 +399,7 @@ class TestGetFolderNotes:
         )
 
         assert response.status_code == status.HTTP_200_OK
-
         data = response.json()
-
         assert data["total"] == 1
         assert len(data["items"]) == 1
         assert data["items"][0]["id"] == note.id
@@ -493,7 +421,6 @@ class TestGetFolderNotes:
             )
             for index in range(3)
         ]
-
         db_session.add_all(notes)
         await db_session.commit()
 
@@ -503,9 +430,7 @@ class TestGetFolderNotes:
         )
 
         assert response.status_code == status.HTTP_200_OK
-
         data = response.json()
-
         assert data["total"] == 3
         assert len(data["items"]) == 2
         assert data["page"] == 1
@@ -518,11 +443,7 @@ class TestGetFolderNotes:
         other_test_user: User,
         test_user: User,
     ):
-        folder = Folder(
-            user_id=other_test_user.id,
-            name="Private Folder",
-        )
-
+        folder = Folder(user_id=other_test_user.id, name="Private Folder")
         db_session.add(folder)
         await db_session.commit()
         await db_session.refresh(folder)
@@ -536,27 +457,22 @@ class TestGetFolderNotes:
 
 
 class TestUpdateFolder:
-
     async def test_update_folder_success(
         self,
         async_client: AsyncClient,
         test_user: User,
         test_folder: Folder,
     ):
-        payload = {
-            "name": "Updated Folder",
-        }
+        payload = {"name": "Updated Folder"}
 
-        response = await async_client.put(
+        response = await async_client.patch(
             f"/api/v1/folders/{test_folder.id}",
             headers=get_auth_headers(test_user),
             json=payload,
         )
 
         assert response.status_code == status.HTTP_200_OK
-
         data = response.json()
-
         assert data["name"] == payload["name"]
         assert data["user_id"] == test_user.id
 
@@ -566,7 +482,7 @@ class TestUpdateFolder:
         test_user: User,
         test_folder: Folder,
     ):
-        response = await async_client.put(
+        response = await async_client.patch(
             f"/api/v1/folders/{test_folder.id}",
             headers=get_auth_headers(test_user),
             json={},
@@ -581,22 +497,14 @@ class TestUpdateFolder:
         test_user: User,
         test_folder: Folder,
     ):
-        other_folder = Folder(
-            user_id=test_user.id,
-            name="Other Folder",
-        )
-
+        other_folder = Folder(user_id=test_user.id, name="Other Folder")
         db_session.add(other_folder)
         await db_session.commit()
 
-        payload = {
-            "name": other_folder.name,
-        }
-
-        response = await async_client.put(
+        response = await async_client.patch(
             f"/api/v1/folders/{test_folder.id}",
             headers=get_auth_headers(test_user),
-            json=payload,
+            json={"name": other_folder.name},
         )
 
         assert response.status_code == status.HTTP_409_CONFLICT
@@ -607,14 +515,10 @@ class TestUpdateFolder:
         test_user: User,
         test_folder: Folder,
     ):
-        payload = {
-            "parent_id": test_folder.id,
-        }
-
-        response = await async_client.put(
+        response = await async_client.patch(
             f"/api/v1/folders/{test_folder.id}",
             headers=get_auth_headers(test_user),
-            json=payload,
+            json={"parent_id": test_folder.id},
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -631,26 +535,20 @@ class TestUpdateFolder:
             parent_id=test_folder.id,
             name="Child Folder",
         )
-
         db_session.add(child_folder)
         await db_session.commit()
         await db_session.refresh(child_folder)
 
-        payload = {
-            "parent_id": child_folder.id,
-        }
-
-        response = await async_client.put(
+        response = await async_client.patch(
             f"/api/v1/folders/{test_folder.id}",
             headers=get_auth_headers(test_user),
-            json=payload,
+            json={"parent_id": child_folder.id},
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
 class TestDeleteFolder:
-
     async def test_delete_folder_success(
         self,
         async_client: AsyncClient,
@@ -691,11 +589,7 @@ class TestDeleteFolder:
         other_test_user: User,
         test_user: User,
     ):
-        folder = Folder(
-            user_id=other_test_user.id,
-            name="Private Folder",
-        )
-
+        folder = Folder(user_id=other_test_user.id, name="Private Folder")
         db_session.add(folder)
         await db_session.commit()
         await db_session.refresh(folder)
